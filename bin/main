@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+const definitions = require('../out/definitions')
+const getTypes = require('../out/get-types')
+
+const input = process.argv[2]
+const parsed = JSON.parse(input)
+const definition = definitions.getTypeDefinition(parsed)
+const types = getTypes.getTypesFromDefinition(definition)
+console.log(types)
