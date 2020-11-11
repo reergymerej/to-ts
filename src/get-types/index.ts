@@ -1,4 +1,8 @@
-import { Definition } from "../definitions";
+import {
+  Definition,
+  ArrayTypeDefinition,
+  ObjectTypeDefinition,
+} from "../definitions";
 
 type Members = {
   [key: string]: Atom;
@@ -20,7 +24,38 @@ type SimpleObject = {
 
 type SimpleDefinition = SimpleArray | SimpleObject;
 
+const treeNodeToListItem = (
+  definition: ArrayTypeDefinition | ObjectTypeDefinition
+): SimpleDefinition => {
+  if ("elements" in definition) {
+    return {
+      type: definition.name,
+      elements: [],
+    };
+  } else if ("members" in definition) {
+    const members = Object.keys(definition.members).reduce((acc, key) => {
+      const value = definition.members[key];
+      const listItem =
+        value.type === "object" || value.type === "array"
+          ? treeNodeToListItem(value)
+          : { type: value.type };
+      return {
+        ...acc,
+        [key]: listItem,
+      };
+    }, {});
+    return {
+      type: definition.name,
+      members,
+    };
+  }
+
+  throw new Error("This should only get objects or arrays.");
+};
+
 const treeToList = (definition: Definition): SimpleDefinition[] => {
+  // Each time in the definition is returned as an element in the list.
+  const types = ["T0", "T1", "T2", "T3", "T4"];
   return [
     {
       type: "T0",
@@ -38,24 +73,37 @@ const treeToList = (definition: Definition): SimpleDefinition[] => {
         { type: "T2" },
       ],
     },
-    {
-      type: "T2",
+    treeNodeToListItem({
+      type: "object",
+      name: "T2",
       members: {
-        1: { type: "T3" },
+        "1": {
+          type: "object",
+          name: "T3",
+          members: {
+            false: { type: "array", name: "T4", elements: [] },
+          },
+        },
         quux: { type: "null" },
         true: { type: "boolean" },
       },
-    },
-    {
-      type: "T3",
+    }),
+    treeNodeToListItem({
+      type: "object",
+      name: "T3",
       members: {
-        false: { type: "T4" },
+        false: {
+          type: "array",
+          name: "T4",
+          elements: [],
+        },
       },
-    },
-    {
-      type: "T4",
+    }),
+    treeNodeToListItem({
+      type: "array",
+      name: "T4",
       elements: [],
-    },
+    }),
   ];
 };
 
