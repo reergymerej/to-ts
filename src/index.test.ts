@@ -6,7 +6,13 @@ import {
   ArrayValue,
   ObjectTypeDefinition,
   ArrayTypeDefinition,
+  reset,
+  getTypeDefinition,
 } from ".";
+
+beforeEach(() => {
+  reset();
+});
 
 describe("getTypeDefintionForValue", () => {
   it("should return the type for `string`", () => {
@@ -80,7 +86,8 @@ describe("getTypeDefinitonForObject", () => {
     };
     const actual = getTypeDefinitonForObject(value);
     const expected: ObjectTypeDefinition = {
-      type: "TODO-find-a-name",
+      type: "object",
+      name: "T0",
       members: {
         a: {
           type: "string",
@@ -111,16 +118,19 @@ describe("getTypeDefinitonForObject", () => {
     };
     const actual = getTypeDefinitonForObject(value);
     const expected: ObjectTypeDefinition = {
-      type: "TODO-find-a-name",
+      type: "object",
+      name: "T0",
       members: {
         a: {
-          type: "TODO-find-a-name",
+          type: "object",
+          name: "T1",
           members: {
             b: {
               type: "string",
             },
             c: {
               type: "array",
+              name: "T2",
               elements: [
                 {
                   type: "number",
@@ -141,6 +151,7 @@ describe("getTypeDefinitionForArray", () => {
     const actual = getTypeDefinitionForArray(value);
     const expected: ArrayTypeDefinition = {
       type: "array",
+      name: "T0",
       elements: [
         {
           type: "number",
@@ -158,6 +169,7 @@ describe("getTypeDefinitionForArray", () => {
     const actual = getTypeDefinitionForArray(value);
     const expected: ArrayTypeDefinition = {
       type: "array",
+      name: "T0",
       elements: [],
     };
     expect(actual).toEqual(expected);
@@ -168,12 +180,14 @@ describe("getTypeDefinitionForArray", () => {
     const actual = getTypeDefinitionForArray(value);
     const expected: ArrayTypeDefinition = {
       type: "array",
+      name: "T0",
       elements: [
         {
           type: "number",
         },
         {
           type: "array",
+          name: "T1",
           elements: [
             {
               type: "string",
@@ -181,7 +195,8 @@ describe("getTypeDefinitionForArray", () => {
           ],
         },
         {
-          type: "TODO-find-a-name",
+          type: "object",
+          name: "T2",
           members: {
             x: {
               type: "boolean",
@@ -193,3 +208,60 @@ describe("getTypeDefinitionForArray", () => {
     expect(actual).toEqual(expected);
   });
 });
+
+type T1 = {
+  false: [];
+};
+
+type T2 = {
+  quux: null;
+  true: boolean;
+  1: T1;
+};
+
+type T3 = [number, number, number, T2];
+
+type T4 = {
+  foo: string;
+  baz: T3;
+};
+
+const x: TT0 = {
+  foo: "bar",
+  baz: [
+    1,
+    2,
+    3,
+    {
+      quux: null,
+      true: false,
+      1: {
+        false: [],
+      },
+    },
+  ],
+};
+
+// const types = getTypeDefinition(x);
+
+type TT0 = {
+  foo: string;
+  baz: TT1;
+};
+
+type TT1 = [number, number, number, TT2];
+
+type TT2 = {
+  1: TT3;
+  quux: null;
+  true: boolean;
+};
+
+type TT3 = {
+  false: TT4;
+};
+
+type TT4 = [];
+
+// RESUME:  The next step is to take the definitions and spit out types like we
+// did above.

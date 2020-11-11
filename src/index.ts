@@ -1,4 +1,29 @@
 type ValueType = "plain" | "object" | "array";
+type Element = TypeDefintion | ArrayTypeDefinition | ObjectTypeDefinition;
+type Value = string | number | boolean | null;
+type ObjectValue = {
+  [key: string]: ArrayValue | ObjectValue | Value | ArrayValue;
+};
+
+export type ArrayValue = unknown[] | ArrayValue[] | Value[] | ObjectValue[];
+
+export type TypeDefintion = {
+  type: "string" | "number" | "boolean" | "null";
+};
+
+export type ArrayTypeDefinition = {
+  type: "array";
+  name: string;
+  elements: Element[];
+};
+
+export type ObjectTypeDefinition = {
+  type: "object";
+  name: string;
+  members: {
+    [key: string]: Element;
+  };
+};
 
 const getValueType = (value: Value | ObjectValue | ArrayValue): ValueType => {
   const type = typeof value;
@@ -16,26 +41,6 @@ const getValueType = (value: Value | ObjectValue | ArrayValue): ValueType => {
   }
   return "object";
 };
-
-type Element = TypeDefintion | ArrayTypeDefinition | ObjectTypeDefinition;
-
-export type TypeDefintion = {
-  type: "string" | "number" | "boolean" | "null";
-};
-
-export type ArrayTypeDefinition = {
-  type: "array";
-  elements: Element[];
-};
-
-export type ObjectTypeDefinition = {
-  type: "TODO-find-a-name";
-  members: {
-    [key: string]: Element;
-  };
-};
-
-type Value = string | number | boolean | null;
 
 const getType = (value: Value): TypeDefintion["type"] => {
   const type = typeof value;
@@ -60,15 +65,22 @@ export const getTypeDefintionForValue = (value: Value): TypeDefintion => {
   };
 };
 
-type ObjectValue = {
-  [key: string]: ArrayValue | ObjectValue | Value;
+let definitions = 0;
+const getName = (): string => {
+  return `T${definitions++}`;
+};
+
+export const reset = (): void => {
+  definitions = 0;
+  return;
 };
 
 export const getTypeDefinitonForObject = (
   objectValue: ObjectValue
 ): ObjectTypeDefinition => {
   return {
-    type: "TODO-find-a-name",
+    type: "object",
+    name: getName(),
     members: Object.keys(objectValue).reduce((acc, key) => {
       const value = objectValue[key];
       const typeDefinition = getTypeDefinition(value);
@@ -80,9 +92,7 @@ export const getTypeDefinitonForObject = (
   };
 };
 
-export type ArrayValue = Value[] | ObjectValue[];
-
-const getTypeDefinition = (
+export const getTypeDefinition = (
   value: Value | ObjectValue | ArrayValue
 ): TypeDefintion | ArrayTypeDefinition | ObjectTypeDefinition => {
   const valueType = getValueType(value);
@@ -103,6 +113,7 @@ export const getTypeDefinitionForArray = (
 ): ArrayTypeDefinition => {
   return {
     type: "array",
+    name: getName(),
     elements: (arrayValue as []).map(getTypeDefinition),
   };
 };
