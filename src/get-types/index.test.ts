@@ -38,7 +38,7 @@ const typesString = `type T0 = {
   baz: T1;
 };
 
-type T1 = [number, number, number, T2];
+type T1 = (number | number | number | T2)[];
 
 type T2 = {
   1: T3;
@@ -60,3 +60,56 @@ describe("getTypesFromDefinition", () => {
     expect(actual).toBe(expected);
   });
 });
+
+describe('arrays', () => {
+  describe('arrays instead of tuples', () => {
+    it('should return an untyped array for empties', () => {
+      const definition: Definition = {
+        type: 'array',
+        name: 'T0',
+        elements: [],
+      }
+      const expected = `type T0 = [];\n`
+      const actual = getTypesFromDefinition(definition)
+      expect(actual).toEqual(expected)
+    })
+
+    it('should work for simple arrays', () => {
+      const definition: Definition = {
+        type: 'array',
+        name: 'T0',
+        elements: [
+          { type: 'number' },
+        ],
+      }
+      const expected = `type T0 = (number)[];\n`
+      const actual = getTypesFromDefinition(definition)
+      expect(actual).toEqual(expected)
+    })
+
+    it('should work for arrays with types', () => {
+      const definition: Definition = {
+        type: 'array',
+        name: 'T0',
+        elements: [
+          { type: 'number' },
+          {
+            type: 'object',
+            name: 'T1',
+            members: {
+              fish: { type: 'boolean' },
+            },
+          },
+        ],
+      }
+      const expected = `type T0 = (number | T1)[];
+
+type T1 = {
+  fish: boolean;
+};\n`
+
+      const actual = getTypesFromDefinition(definition)
+      expect(actual).toEqual(expected)
+    })
+  })
+})

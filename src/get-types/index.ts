@@ -106,12 +106,19 @@ const toStringObject = (simpleObject: SimpleObject): string => {
   return template;
 };
 
+const getUnionString = (elements: string[]): string => {
+  return elements.length
+    ? `(${elements.join(" | ")})`
+    : ''
+}
+
 const toStringArray = (simpleArray: SimpleArray): string => {
   const typeName = simpleArray.type;
   const elements = simpleArray.elements.map((x) => {
     return x.type;
   });
-  const elementsString = `[${elements.join(", ")}];`;
+  const unionString = getUnionString(elements)
+  const elementsString = `${unionString}[];`;
   const template = `type ${typeName} = ${elementsString}`;
   return template;
 };
