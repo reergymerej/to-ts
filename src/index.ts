@@ -61,7 +61,7 @@ export const getTypeDefintionForValue = (value: Value): TypeDefintion => {
 };
 
 type ObjectValue = {
-  [key: string]: ObjectValue | Value;
+  [key: string]: ArrayValue | ObjectValue | Value;
 };
 
 export const getTypeDefinitonForObject = (
@@ -98,7 +98,9 @@ const getTypeDefinition = (
   }
 };
 
-export const getTypeDefinitionForArray = (arrayValue: ArrayValue): any => {
+export const getTypeDefinitionForArray = (
+  arrayValue: ArrayValue
+): ArrayTypeDefinition => {
   return {
     type: "array",
     elements: (arrayValue as []).map(getTypeDefinition),

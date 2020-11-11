@@ -106,6 +106,7 @@ describe("getTypeDefinitonForObject", () => {
     const value = {
       a: {
         b: "castle",
+        c: [1],
       },
     };
     const actual = getTypeDefinitonForObject(value);
@@ -117,6 +118,14 @@ describe("getTypeDefinitonForObject", () => {
           members: {
             b: {
               type: "string",
+            },
+            c: {
+              type: "array",
+              elements: [
+                {
+                  type: "number",
+                },
+              ],
             },
           },
         },
@@ -155,7 +164,7 @@ describe("getTypeDefinitionForArray", () => {
   });
 
   it("should handle nested values", () => {
-    const value = [1, ["two"]] as ArrayValue;
+    const value = [1, ["two"], { x: false }] as ArrayValue;
     const actual = getTypeDefinitionForArray(value);
     const expected: ArrayTypeDefinition = {
       type: "array",
@@ -170,6 +179,14 @@ describe("getTypeDefinitionForArray", () => {
               type: "string",
             },
           ],
+        },
+        {
+          type: "TODO-find-a-name",
+          members: {
+            x: {
+              type: "boolean",
+            },
+          },
         },
       ],
     };
