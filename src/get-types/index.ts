@@ -107,9 +107,11 @@ const toStringObject = (simpleObject: SimpleObject): string => {
 };
 
 const getUnionString = (elements: string[]): string => {
-  return elements.length
-    ? `(${elements.join(" | ")})`
-    : ''
+  if (elements.length) {
+    const unique = elements.filter((x, i, all) => all.indexOf(x) === i)
+    return `(${unique.join(" | ")})`
+  }
+  return ''
 }
 
 const toStringArray = (simpleArray: SimpleArray): string => {
