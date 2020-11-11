@@ -33,7 +33,7 @@ const definition: Definition = {
   },
 };
 
-const typesString = `type T0 = {
+const typesString = `export type T0 = {
   foo: string;
   baz: T1;
 };
@@ -69,7 +69,7 @@ describe('arrays', () => {
         name: 'T0',
         elements: [],
       }
-      const expected = `type T0 = [];\n`
+      const expected = `export type T0 = [];\n`
       const actual = getTypesFromDefinition(definition)
       expect(actual).toEqual(expected)
     })
@@ -82,7 +82,7 @@ describe('arrays', () => {
           { type: 'number' },
         ],
       }
-      const expected = `type T0 = (number)[];\n`
+      const expected = `export type T0 = (number)[];\n`
       const actual = getTypesFromDefinition(definition)
       expect(actual).toEqual(expected)
     })
@@ -98,7 +98,7 @@ describe('arrays', () => {
           { type: 'number' },
         ],
       }
-      const expected = `type T0 = (number)[];\n`
+      const expected = `export type T0 = (number)[];\n`
       const actual = getTypesFromDefinition(definition)
       expect(actual).toEqual(expected)
     })
@@ -118,7 +118,7 @@ describe('arrays', () => {
           },
         ],
       }
-      const expected = `type T0 = (number | T1)[];
+      const expected = `export type T0 = (number | T1)[];
 
 type T1 = {
   fish: boolean;

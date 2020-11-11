@@ -139,5 +139,6 @@ const toString = (simpleDefinition: SimpleDefinition): string => {
 export const getTypesFromDefinition = (definition: Definition): string => {
   const list = treeToList(definition);
   const definitions = list.map(toString);
-  return definitions.join("\n\n") + "\n";
+  const prefix = 'export '
+  return `${prefix}${definitions.join("\n\n")}\n`;
 };
