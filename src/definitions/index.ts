@@ -10,7 +10,10 @@ export type ArrayValue = unknown[] | ArrayValue[] | Value[] | ObjectValue[];
 export type TypeDefintion = {
   type: "string" | "number" | "boolean" | "null";
 };
-
+export type Definition =
+  | TypeDefintion
+  | ArrayTypeDefinition
+  | ObjectTypeDefinition;
 export type ArrayTypeDefinition = {
   type: "array";
   name: string;
@@ -94,7 +97,7 @@ export const getTypeDefinitonForObject = (
 
 export const getTypeDefinition = (
   value: Value | ObjectValue | ArrayValue
-): TypeDefintion | ArrayTypeDefinition | ObjectTypeDefinition => {
+): Definition => {
   const valueType = getValueType(value);
   switch (valueType) {
     case "plain":

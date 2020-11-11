@@ -209,23 +209,6 @@ describe("getTypeDefinitionForArray", () => {
   });
 });
 
-type T1 = {
-  false: [];
-};
-
-type T2 = {
-  quux: null;
-  true: boolean;
-  1: T1;
-};
-
-type T3 = [number, number, number, T2];
-
-type T4 = {
-  foo: string;
-  baz: T3;
-};
-
 const x: TT0 = {
   foo: "bar",
   baz: [
@@ -242,7 +225,7 @@ const x: TT0 = {
   ],
 };
 
-// const types = getTypeDefinition(x);
+const types = getTypeDefinition(x);
 
 type TT0 = {
   foo: string;
@@ -262,6 +245,3 @@ type TT3 = {
 };
 
 type TT4 = [];
-
-// RESUME:  The next step is to take the definitions and spit out types like we
-// did above.
