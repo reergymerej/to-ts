@@ -1,5 +1,5 @@
 import { getTypesFromDefinition } from ".";
-import { Definition } from "../definitions";
+import { Definition, getTypeDefinition } from "../definitions";
 
 const definition: Definition = {
   type: "object",
@@ -127,5 +127,36 @@ type T1 = {
       const actual = getTypesFromDefinition(definition)
       expect(actual).toEqual(expected)
     })
+  })
+})
+
+fdescribe('tuples', () => {
+  it('should come out with the correct types', () => {
+      const definition: Definition = getTypeDefinition({
+        tuple: [
+          1,
+          [
+            true,
+            false,
+          ],
+          {
+            color: 'green',
+          },
+        ],
+      })
+      const actual = getTypesFromDefinition(definition);
+      const expected = `export type T0 = {
+  tuple: T1;
+};
+
+type T1 = (number | T1 | T3)[];
+
+type T3 = {
+  color: string;
+};
+
+type T2 = (boolean)[];
+`
+    expect(actual).toBe(expected)
   })
 })

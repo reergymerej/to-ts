@@ -114,10 +114,13 @@ const getUnionString = (elements: string[]): string => {
   return ''
 }
 
-const toStringArray = (simpleArray: SimpleArray): string => {
+const toStringArray = (simpleArray: SimpleArray, parentTypeName: string): string => {
   const typeName = simpleArray.type;
-  const elements = simpleArray.elements.map((x) => {
-    return x.type;
+  const elements = simpleArray.elements.map((element) => {
+    if (element.type === 'array') {
+      return parentTypeName
+    }
+    return element.type;
   });
   const unionString = getUnionString(elements)
   const elementsString = `${unionString}[];`;
@@ -131,7 +134,7 @@ const toString = (simpleDefinition: SimpleDefinition): string => {
   if (isObject) {
     defString = toStringObject(simpleDefinition as SimpleObject);
   } else {
-    defString = toStringArray(simpleDefinition as SimpleArray);
+    defString = toStringArray(simpleDefinition as SimpleArray, simpleDefinition.type);
   }
   return defString;
 };
