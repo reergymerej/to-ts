@@ -1,4 +1,10 @@
-import { getTypeDefintionForValue, TypeDefintion, getTypesForObject } from ".";
+import {
+  getTypeDefintionForValue,
+  TypeDefintion,
+  getTypeDefinitonForObject,
+  getTypeDefinitionForArray,
+  ArrayValue,
+} from ".";
 
 describe("getTypeDefintionForValue", () => {
   it("should return the type for `string`", () => {
@@ -61,7 +67,7 @@ describe("getTypeDefintionForValue", () => {
   });
 });
 
-describe("getTypesForObject", () => {
+describe("getTypeDefinitonForObject", () => {
   it("should handle flat objects", () => {
     const value = {
       a: "apple",
@@ -70,7 +76,7 @@ describe("getTypesForObject", () => {
       d: 999,
       e: null,
     };
-    const actual = getTypesForObject(value);
+    const actual = getTypeDefinitonForObject(value);
     const expected = {
       a: {
         type: "string",
@@ -87,6 +93,77 @@ describe("getTypesForObject", () => {
       e: {
         type: "null",
       },
+    };
+    expect(actual).toEqual(expected);
+  });
+
+  it("should handle deep objects", () => {
+    const value = {
+      a: {
+        b: "castle",
+      },
+    };
+    const actual = getTypeDefinitonForObject(value);
+    const expected = {
+      a: {
+        type: "TODO-find-a-name",
+        members: {
+          b: {
+            type: "string",
+          },
+        },
+      },
+    };
+    expect(actual).toEqual(expected);
+  });
+});
+
+describe("getTypeDefinitionForArray", () => {
+  it("should handle simple values", () => {
+    const value = [1, "two"];
+    const actual = getTypeDefinitionForArray(value);
+    const expected = {
+      type: "array",
+      elements: [
+        {
+          type: "number",
+        },
+        {
+          type: "string",
+        },
+      ],
+    };
+    expect(actual).toEqual(expected);
+  });
+
+  it("should handle empty lists", () => {
+    const value = [];
+    const actual = getTypeDefinitionForArray(value);
+    const expected = {
+      type: "array",
+      elements: [],
+    };
+    expect(actual).toEqual(expected);
+  });
+
+  it("should handle nested values", () => {
+    const value = [1, ["two"]] as ArrayValue;
+    const actual = getTypeDefinitionForArray(value);
+    const expected = {
+      type: "array",
+      elements: [
+        {
+          type: "number",
+        },
+        {
+          type: "array",
+          elements: [
+            {
+              type: "string",
+            },
+          ],
+        },
+      ],
     };
     expect(actual).toEqual(expected);
   });
