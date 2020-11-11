@@ -62,71 +62,37 @@ const treeNodeToListItem = (
   throw new Error("This should only get objects or arrays.");
 };
 
+const search = (nextNode) => (root, visit) => {
+  let list = [root];
+  while (list.length) {
+    const node = nextNode(list);
+    visit(node);
+    if (node.elements) {
+      list = list.concat(node.elements);
+    } else if (node.members) {
+      list = list.concat(
+        Object.keys(node.members).map((key) => {
+          return node.members[key];
+        })
+      );
+    }
+  }
+};
+
+const dfs = search((list) => list.pop());
+
 const treeToList = (definition: Definition): SimpleDefinition[] => {
-  return [
-    {
-      type: "T0",
-      members: {
-        foo: { type: "string" },
-        baz: { type: "T1" },
-      },
-    },
-    treeNodeToListItem({
-      type: "array",
-      name: "T1",
-      elements: [
-        { type: "number" },
-        { type: "number" },
-        { type: "number" },
-        {
-          type: "object",
-          name: "T2",
-          members: {
-            "1": {
-              type: "object",
-              name: "T3",
-              members: {
-                false: { type: "array", name: "T4", elements: [] },
-              },
-            },
-            quux: { type: "null" },
-            true: { type: "boolean" },
-          },
-        },
-      ],
-    }),
-    treeNodeToListItem({
-      type: "object",
-      name: "T2",
-      members: {
-        "1": {
-          type: "object",
-          name: "T3",
-          members: {
-            false: { type: "array", name: "T4", elements: [] },
-          },
-        },
-        quux: { type: "null" },
-        true: { type: "boolean" },
-      },
-    }),
-    treeNodeToListItem({
-      type: "object",
-      name: "T3",
-      members: {
-        false: {
-          type: "array",
-          name: "T4",
-          elements: [],
-        },
-      },
-    }),
-    treeNodeToListItem({
-      type: "array",
-      name: "T4",
-      elements: [],
-    }),
-  ];
+  // For each type: object|array, convert and add to list
+  // dfs
+  const listItems = [];
+  const visit = (node) => {
+    if (node.type === "object" || node.type === "array") {
+      listItems.push(treeNodeToListItem(node));
+    }
+  };
+  dfs(definition, visit);
+
+  return listItems;
 };
 
 const toStringObject = (simpleObject: SimpleObject): string => {
