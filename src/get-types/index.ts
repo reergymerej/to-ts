@@ -62,7 +62,7 @@ const treeNodeToListItem = (
   throw new Error("This should only get objects or arrays.");
 };
 
-const search = (nextNode) => (root, visit) => {
+const search = (nextNode: any) => (root: any, visit: (arg0: any) => void) => {
   let list = [root];
   while (list.length) {
     const node = nextNode(list);
@@ -79,19 +79,18 @@ const search = (nextNode) => (root, visit) => {
   }
 };
 
-const dfs = search((list) => list.pop());
+const dfs = search((list: []) => list.pop());
 
 const treeToList = (definition: Definition): SimpleDefinition[] => {
   // For each type: object|array, convert and add to list
   // dfs
-  const listItems = [];
-  const visit = (node) => {
+  const listItems: SimpleDefinition[] = [];
+  const visit = (node: Definition) => {
     if (node.type === "object" || node.type === "array") {
       listItems.push(treeNodeToListItem(node));
     }
   };
   dfs(definition, visit);
-
   return listItems;
 };
 
