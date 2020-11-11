@@ -1,4 +1,4 @@
-import { getTypesFromDefinition } from ".";
+import { getTypesFromDefinition, SimpleDefinition, dedupe } from ".";
 import { Definition, getTypeDefinition } from "../definitions";
 
 const definition: Definition = {
@@ -130,7 +130,7 @@ type T1 = {
   })
 })
 
-fdescribe('tuples', () => {
+describe('tuples', () => {
   it('should come out with the correct types', () => {
       const definition: Definition = getTypeDefinition({
         tuple: [
@@ -158,5 +158,86 @@ type T3 = {
 type T2 = (boolean)[];
 `
     expect(actual).toBe(expected)
+  })
+})
+
+xdescribe('de-dupe types', () => {
+  it('should eagerly de-dupe', () => {
+    const definition = getTypeDefinition({
+      a: {
+        person: {
+          hair: 'brown',
+        },
+      },
+      b: {
+        person: {
+          hair: 'blue',
+        },
+      },
+    })
+    const actual = getTypesFromDefinition(definition)
+    const expected = `export type T0 = {
+  a: T1;
+  b: T3;
+};
+
+type T3 = {
+  person: T4;
+};
+
+type T4 = {
+  hair: string;
+};
+
+type T1 = {
+  person: T2;
+};
+
+type T2 = {
+  hair: string;
+};
+`
+    expect(actual).toBe(expected)
+  })
+})
+
+fdescribe('dedupe', () => {
+  it('should remove duplicates', () => {
+    const list: SimpleDefinition[] = [
+      {
+        type: 'T0',
+        members: {
+          hair: { type: 'string' },
+        },
+      },
+      {
+        type: 'T1',
+        members: {
+          hair: { type: 'string' },
+        },
+      },
+      {
+        type: 'T2',
+        members: {
+          weasel: { type: 'string' },
+        },
+      },
+    ]
+    const actual = dedupe(list)
+    const expected = [
+      {
+        type: 'T0',
+        members: {
+          hair: { type: 'string' },
+        },
+      },
+      {
+        type: 'T2',
+        members: {
+          weasel: { type: 'string' },
+        },
+      },
+    ]
+    expect(actual).toEqual(expected)
   })
 })

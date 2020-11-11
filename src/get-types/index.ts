@@ -22,7 +22,7 @@ type SimpleObject = {
   members: Members;
 };
 
-type SimpleDefinition = SimpleArray | SimpleObject;
+export type SimpleDefinition = SimpleArray | SimpleObject;
 
 const treeNodeToListItem = (
   definition: ArrayTypeDefinition | ObjectTypeDefinition
@@ -83,11 +83,11 @@ const dfs = search((list: []) => list.pop());
 
 const treeToList = (definition: Definition): SimpleDefinition[] => {
   // For each type: object|array, convert and add to list
-  // dfs
   const listItems: SimpleDefinition[] = [];
   const visit = (node: Definition) => {
     if (node.type === "object" || node.type === "array") {
-      listItems.push(treeNodeToListItem(node));
+      const listItem = treeNodeToListItem(node)
+      listItems.push(listItem);
     }
   };
   dfs(definition, visit);
@@ -139,9 +139,36 @@ const toString = (simpleDefinition: SimpleDefinition): string => {
   return defString;
 };
 
+const hashSimpleDef = (def: SimpleDefinition): string => {
+  if ('members' in def) {
+    return `{members:${JSON.stringify(def.members)}}`
+  }
+  return `{elements:${JSON.stringify(def.elements)}}`
+}
+
+const areEqual = (a: SimpleDefinition, b: SimpleDefinition): boolean => {
+  return hashSimpleDef(a) === hashSimpleDef(b)
+}
+
+export const dedupe = (list: SimpleDefinition[]): SimpleDefinition[] => {
+  // for each item
+  // compare against the others
+  list.forEach((x, i, all) => {
+    all.slice(i + 1).forEach(y => {
+      if (areEqual( x, y)) {
+        console.log('dupe', y)
+      }
+    })
+  })
+
+  console.log(JSON.stringify(list))
+  return list
+}
+
 export const getTypesFromDefinition = (definition: Definition): string => {
   const list = treeToList(definition);
-  const definitions = list.map(toString);
+  const dedupedList = dedupe(list)
+  const definitions = dedupedList.map(toString);
   const prefix = 'export '
   return `${prefix}${definitions.join("\n\n")}\n`;
 };
