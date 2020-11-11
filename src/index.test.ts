@@ -4,6 +4,8 @@ import {
   getTypeDefinitonForObject,
   getTypeDefinitionForArray,
   ArrayValue,
+  ObjectTypeDefinition,
+  ArrayTypeDefinition,
 } from ".";
 
 describe("getTypeDefintionForValue", () => {
@@ -77,21 +79,24 @@ describe("getTypeDefinitonForObject", () => {
       e: null,
     };
     const actual = getTypeDefinitonForObject(value);
-    const expected = {
-      a: {
-        type: "string",
-      },
-      b: {
-        type: "boolean",
-      },
-      c: {
-        type: "boolean",
-      },
-      d: {
-        type: "number",
-      },
-      e: {
-        type: "null",
+    const expected: ObjectTypeDefinition = {
+      type: "TODO-find-a-name",
+      members: {
+        a: {
+          type: "string",
+        },
+        b: {
+          type: "boolean",
+        },
+        c: {
+          type: "boolean",
+        },
+        d: {
+          type: "number",
+        },
+        e: {
+          type: "null",
+        },
       },
     };
     expect(actual).toEqual(expected);
@@ -104,12 +109,15 @@ describe("getTypeDefinitonForObject", () => {
       },
     };
     const actual = getTypeDefinitonForObject(value);
-    const expected = {
-      a: {
-        type: "TODO-find-a-name",
-        members: {
-          b: {
-            type: "string",
+    const expected: ObjectTypeDefinition = {
+      type: "TODO-find-a-name",
+      members: {
+        a: {
+          type: "TODO-find-a-name",
+          members: {
+            b: {
+              type: "string",
+            },
           },
         },
       },
@@ -122,7 +130,7 @@ describe("getTypeDefinitionForArray", () => {
   it("should handle simple values", () => {
     const value = [1, "two"];
     const actual = getTypeDefinitionForArray(value);
-    const expected = {
+    const expected: ArrayTypeDefinition = {
       type: "array",
       elements: [
         {
@@ -139,7 +147,7 @@ describe("getTypeDefinitionForArray", () => {
   it("should handle empty lists", () => {
     const value = [];
     const actual = getTypeDefinitionForArray(value);
-    const expected = {
+    const expected: ArrayTypeDefinition = {
       type: "array",
       elements: [],
     };
@@ -149,7 +157,7 @@ describe("getTypeDefinitionForArray", () => {
   it("should handle nested values", () => {
     const value = [1, ["two"]] as ArrayValue;
     const actual = getTypeDefinitionForArray(value);
-    const expected = {
+    const expected: ArrayTypeDefinition = {
       type: "array",
       elements: [
         {
