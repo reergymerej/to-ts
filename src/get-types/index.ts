@@ -30,7 +30,16 @@ const treeNodeToListItem = (
   if ("elements" in definition) {
     return {
       type: definition.name,
-      elements: [],
+      elements: definition.elements.map((x) => {
+        if (x.type === "object") {
+          return {
+            type: x.name,
+          };
+        }
+        return {
+          type: x.type,
+        };
+      }),
     };
   } else if ("members" in definition) {
     const members = Object.keys(definition.members).reduce((acc, key) => {
@@ -54,8 +63,6 @@ const treeNodeToListItem = (
 };
 
 const treeToList = (definition: Definition): SimpleDefinition[] => {
-  // Each time in the definition is returned as an element in the list.
-  const types = ["T0", "T1", "T2", "T3", "T4"];
   return [
     {
       type: "T0",
@@ -64,15 +71,30 @@ const treeToList = (definition: Definition): SimpleDefinition[] => {
         baz: { type: "T1" },
       },
     },
-    {
-      type: "T1",
+    treeNodeToListItem({
+      type: "array",
+      name: "T1",
       elements: [
         { type: "number" },
         { type: "number" },
         { type: "number" },
-        { type: "T2" },
+        {
+          type: "object",
+          name: "T2",
+          members: {
+            "1": {
+              type: "object",
+              name: "T3",
+              members: {
+                false: { type: "array", name: "T4", elements: [] },
+              },
+            },
+            quux: { type: "null" },
+            true: { type: "boolean" },
+          },
+        },
       ],
-    },
+    }),
     treeNodeToListItem({
       type: "object",
       name: "T2",
