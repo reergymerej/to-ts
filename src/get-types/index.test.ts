@@ -1,4 +1,4 @@
-import { getTypesFromDefinition, SimpleDefinition, dedupe } from ".";
+import { getTypesFromDefinition, SimpleDefinition, dedupe, ReplacementMap, updateReplacments, treeToList } from ".";
 import { Definition, getTypeDefinition } from "../definitions";
 
 const definition: Definition = {
@@ -161,7 +161,7 @@ type T2 = (boolean)[];
   })
 })
 
-xdescribe('de-dupe types', () => {
+fdescribe('de-dupe types', () => {
   it('should eagerly de-dupe', () => {
     const definition = getTypeDefinition({
       a: {
@@ -178,15 +178,7 @@ xdescribe('de-dupe types', () => {
     const actual = getTypesFromDefinition(definition)
     const expected = `export type T0 = {
   a: T1;
-  b: T3;
-};
-
-type T3 = {
-  person: T4;
-};
-
-type T4 = {
-  hair: string;
+  b: T1;
 };
 
 type T1 = {
@@ -197,11 +189,12 @@ type T2 = {
   hair: string;
 };
 `
+    console.log(actual)
     expect(actual).toBe(expected)
   })
 })
 
-fdescribe('dedupe', () => {
+describe('dedupe', () => {
   it('should remove duplicates', () => {
     const list: SimpleDefinition[] = [
       {
@@ -222,6 +215,24 @@ fdescribe('dedupe', () => {
           weasel: { type: 'string' },
         },
       },
+      {
+        type: 'T3',
+        members: {
+          weasel: { type: 'string' },
+        },
+      },
+      {
+        type: 'T4',
+        members: {
+          weasel: { type: 'string' },
+        },
+      },
+      {
+        type: 'T5',
+        members: {
+          hair: { type: 'string' },
+        },
+      },
     ]
     const actual = dedupe(list)
     const expected = [
@@ -238,6 +249,167 @@ fdescribe('dedupe', () => {
         },
       },
     ]
+    expect(actual.deduped).toEqual(expected)
+    expect(actual.replacementMap).toEqual({
+      T1: 'T0',
+      T5: 'T0',
+      T3: 'T2',
+      T4: 'T2',
+    })
+  })
+})
+
+describe('updateReplacments', () => {
+  it('should replace types in the list based on the replacementMap', () => {
+    const replacementMap: ReplacementMap = {
+      T1: 'T0',
+      T4: 'T0',
+      T5: 'T3',
+    }
+    const definitions: SimpleDefinition[] = [
+      {
+        type: 'T0',
+        elements: []
+      },
+      {
+        type: 'T1',
+        elements: []
+      },
+      {
+        type: 'T2',
+        elements: []
+      },
+      {
+        type: 'T3',
+        elements: []
+      },
+      {
+        type: 'T4',
+        elements: []
+      },
+      {
+        type: 'T5',
+        elements: []
+      },
+    ]
+
+    const actual = updateReplacments(definitions, replacementMap)
+    const expected: SimpleDefinition[] = [
+      {
+        type: 'T0',
+        elements: []
+      },
+      {
+        type: 'T0',
+        elements: []
+      },
+      {
+        type: 'T2',
+        elements: []
+      },
+      {
+        type: 'T3',
+        elements: []
+      },
+      {
+        type: 'T0',
+        elements: []
+      },
+      {
+        type: 'T3',
+        elements: []
+      },
+    ]
+    expect(actual).toEqual(expected)
+  })
+
+  xit('should replace member references', () => {
+    const definition = getTypeDefinition({
+      a: {
+        person: {
+          hair: 'brown',
+        },
+      },
+      b: {
+        person: {
+          hair: 'blue',
+        },
+      },
+    })
+    const list = treeToList(definition)
+    const {
+      replacementMap,
+      deduped,
+    } = dedupe(list)
+    const actual = updateReplacments(deduped, replacementMap)
+    const expected = [
+      {
+        "members": {
+          "a": {
+            "members": {
+              "person": {
+                "members": {
+                  "hair": {
+                    "type": "string"
+                  }
+                },
+                "type": "T2"
+              }
+            },
+            "type": "T1"
+          },
+          "b": {
+            "members": {
+              "person": {
+                "members": {
+                  "hair": {
+                    "type": "string"
+                  }
+                },
+                "type": "T4"
+              }
+            },
+            "type": "T3"
+          }
+        },
+        "type": "T0"
+      },
+      {
+        "members": {
+          "person": {
+            "members": {
+              "hair": {
+                "type": "string"
+              }
+            },
+            "type": "T4"
+          }
+        },
+        "type": "T3"
+      },
+      {
+        "members": {
+          "hair": {
+            "type": "string"
+          }
+        },
+        "type": "T4"
+      },
+      {
+        "members": {
+          "person": {
+            "members": {
+              "hair": {
+                "type": "string"
+              }
+            },
+            "type": "T2"
+          }
+        },
+        "type": "T1"
+      }
+    ]
+    console.log(JSON.stringify(actual))
     expect(actual).toEqual(expected)
   })
 })

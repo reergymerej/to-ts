@@ -63,14 +63,14 @@ const treeNodeToListItem = (
 };
 
 const search = (nextNode: any) => (root: any, visit: (arg0: any) => void) => {
-  let list = [root];
-  while (list.length) {
-    const node = nextNode(list);
+  let nodesToVisit = [root];
+  while (nodesToVisit.length) {
+    const node = nextNode(nodesToVisit);
     visit(node);
     if (node.elements) {
-      list = list.concat(node.elements);
+      nodesToVisit = nodesToVisit.concat(node.elements);
     } else if (node.members) {
-      list = list.concat(
+      nodesToVisit = nodesToVisit.concat(
         Object.keys(node.members).map((key) => {
           return node.members[key];
         })
@@ -81,7 +81,7 @@ const search = (nextNode: any) => (root: any, visit: (arg0: any) => void) => {
 
 const dfs = search((list: []) => list.pop());
 
-const treeToList = (definition: Definition): SimpleDefinition[] => {
+export const treeToList = (definition: Definition): SimpleDefinition[] => {
   // For each type: object|array, convert and add to list
   const listItems: SimpleDefinition[] = [];
   const visit = (node: Definition) => {
@@ -150,25 +150,97 @@ const areEqual = (a: SimpleDefinition, b: SimpleDefinition): boolean => {
   return hashSimpleDef(a) === hashSimpleDef(b)
 }
 
-export const dedupe = (list: SimpleDefinition[]): SimpleDefinition[] => {
-  // for each item
-  // compare against the others
-  list.forEach((x, i, all) => {
-    all.slice(i + 1).forEach(y => {
-      if (areEqual( x, y)) {
-        console.log('dupe', y)
-      }
-    })
-  })
+export type ReplacementMap = {
+  [oldType: string]: string // new type
+}
 
-  console.log(JSON.stringify(list))
-  return list
+export const dedupe = (definitions: SimpleDefinition[]): {
+  deduped: SimpleDefinition[],
+  replacementMap: ReplacementMap,
+} => {
+  // Use queues so we can remove the items during the loop without goofing up
+  // indices.
+  const queue = [...definitions]
+  let a = queue.shift()
+  const dedupedList: SimpleDefinition[] = []
+  const replacementMap: ReplacementMap = {}
+
+  while (a) {
+    const [...remainder] = queue
+    const dupes: SimpleDefinition[] = []
+
+    let b = remainder.shift()
+    while (b) {
+      if (areEqual(a, b)) {
+        dupes.push(b)
+      }
+      b = remainder.shift()
+    }
+
+    dedupedList.push(a)
+    dupes.forEach(dupe => {
+      const index = queue.indexOf(dupe)
+      if (a) {
+        replacementMap[dupe.type] = a.type
+      }
+      queue.splice(index, 1)
+    })
+
+    a = queue.shift()
+  }
+
+  return {
+    deduped: dedupedList,
+    replacementMap,
+  }
+}
+
+const isObjectType = (def: SimpleDefinition): def is SimpleObject => {
+  return (def as SimpleObject).members !== undefined
+}
+
+const isArrayType = (def: SimpleDefinition): def is SimpleArray => {
+  return (def as SimpleArray).elements !== undefined
+}
+
+type ObjectIterator = (key: string, member: Atom) => void
+
+const iterateObject = (simpleObject: SimpleObject, fn: ObjectIterator): void => {
+  Object.keys((simpleObject as SimpleObject).members).forEach(key => {
+    const value = simpleObject.members[key]
+    fn(key, value)
+  })
+}
+
+const replaceTypes = (replacementMap: ReplacementMap) =>
+(def: SimpleDefinition): SimpleDefinition => {
+  if (isObjectType(def)) {
+    iterateObject(def, (key, member) => {
+      replaceTypes(member)
+    })
+
+  } else if (isArrayType(def)) {
+    // return def
+    throw new Error('handle array')
+  }
+
+  def.type = replacementMap[def.type] || def.type
+  return def
+}
+
+export const updateReplacments = (
+  definitions: SimpleDefinition[],
+  replacementMap: ReplacementMap
+): SimpleDefinition[] => {
+  console.log(replacementMap)
+  return definitions.map(replaceTypes(replacementMap))
 }
 
 export const getTypesFromDefinition = (definition: Definition): string => {
   const list = treeToList(definition);
-  const dedupedList = dedupe(list)
-  const definitions = dedupedList.map(toString);
+  const { replacementMap, deduped } = dedupe(list)
+  const withReplacedTypes: SimpleDefinition[] = updateReplacments(deduped, replacementMap)
+  const definitions = withReplacedTypes.map(toString);
   const prefix = 'export '
   return `${prefix}${definitions.join("\n\n")}\n`;
 };
