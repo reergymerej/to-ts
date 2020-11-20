@@ -125,14 +125,14 @@ describe("getTypeDefinitonForObject", () => {
       members: {
         a: {
           type: "object",
-          name: "A1",
+          name: "A",
           members: {
             b: {
               type: "string",
             },
             c: {
               type: "array",
-              name: "C2",
+              name: "C",
               elements: [
                 {
                   type: "number",
@@ -189,7 +189,7 @@ describe("getTypeDefinitionForArray", () => {
         },
         {
           type: "array",
-          name: "T1",
+          name: "T",
           elements: [
             {
               type: "string",
@@ -198,7 +198,7 @@ describe("getTypeDefinitionForArray", () => {
         },
         {
           type: "object",
-          name: "T2",
+          name: "T2", // duplicate name
           members: {
             x: {
               type: "boolean",
@@ -223,7 +223,7 @@ describe("type names", () => {
     it("should attempt to match the name of the field", () => {
       const result = getTypeDefinition(namesFixture) as ObjectTypeDefinition;
       const personMember = result.members.person as ObjectTypeDefinition;
-      expect(personMember.name).toBe("Person1");
+      expect(personMember.name).toBe("Person");
     });
   });
 
@@ -233,7 +233,7 @@ describe("type names", () => {
         arrayItemsFixture
       ) as ObjectTypeDefinition;
       const peopleMember = result.members.people as ObjectTypeDefinition;
-      expect(peopleMember.name).toBe("People1");
+      expect(peopleMember.name).toBe("People");
     });
   });
 });

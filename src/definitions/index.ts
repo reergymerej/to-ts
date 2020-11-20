@@ -73,6 +73,21 @@ const capitalizeFirst = (x: string): string => {
 };
 
 let definitions = 0;
+type DefinitionMap = { [name: string]: number };
+let definitionMap: DefinitionMap = {
+  Root: 1,
+};
+
+const getNextDefinitionName = (capitalized: string): string => {
+  let count = definitionMap[capitalized] || 0;
+  count++;
+  definitionMap[capitalized] = count;
+  if (count === 1) {
+    return capitalized;
+  }
+  return `${capitalized}${count}`;
+};
+
 type GetName = (fieldName?: string) => string;
 const getName: GetName = (fieldName = "T") => {
   const capitalized = capitalizeFirst(fieldName);
@@ -80,11 +95,12 @@ const getName: GetName = (fieldName = "T") => {
     definitions++;
     return "Root";
   }
-  return `${capitalized}${definitions++}`;
+  return getNextDefinitionName(capitalized);
 };
 
 export const reset = (): void => {
   definitions = 0;
+  definitionMap = { Root: 1 };
   return;
 };
 
