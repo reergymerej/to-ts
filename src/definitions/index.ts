@@ -68,9 +68,19 @@ export const getTypeDefintionForValue = (value: Value): TypeDefintion => {
   };
 };
 
+const capitalizeFirst = (x: string): string => {
+  return `${x.charAt(0).toUpperCase()}${x.slice(1)}`;
+};
+
 let definitions = 0;
-const getName = (): string => {
-  return `T${definitions++}`;
+type GetName = (fieldName?: string) => string;
+const getName: GetName = (fieldName = "T") => {
+  const capitalized = capitalizeFirst(fieldName);
+  if (definitions === 0) {
+    definitions++;
+    return "Root";
+  }
+  return `${capitalized}${definitions++}`;
 };
 
 export const reset = (): void => {
@@ -78,15 +88,21 @@ export const reset = (): void => {
   return;
 };
 
-export const getTypeDefinitonForObject = (
-  objectValue: ObjectValue
-): ObjectTypeDefinition => {
+type GetTypeDefinitonForObject = (
+  objectValue: ObjectValue,
+  scopeName?: string
+) => ObjectTypeDefinition;
+
+export const getTypeDefinitonForObject: GetTypeDefinitonForObject = (
+  objectValue,
+  scopeName
+) => {
   return {
     type: "object",
-    name: getName(),
+    name: getName(scopeName),
     members: Object.keys(objectValue).reduce((acc, key) => {
       const value = objectValue[key];
-      const typeDefinition = getTypeDefinition(value);
+      const typeDefinition = getTypeDefinition(value, key);
       return {
         ...acc,
         [key]: typeDefinition,
@@ -95,9 +111,11 @@ export const getTypeDefinitonForObject = (
   };
 };
 
-export const getTypeDefinition = (
-  value: Value | ObjectValue | ArrayValue
-): Definition => {
+type GetTypeDefinition = (
+  value: Value | ObjectValue | ArrayValue,
+  scopeName?: string
+) => Definition;
+export const getTypeDefinition: GetTypeDefinition = (value, scopeName) => {
   const valueType = getValueType(value);
   switch (valueType) {
     case "plain":
@@ -105,7 +123,7 @@ export const getTypeDefinition = (
     case "array":
       return getTypeDefinitionForArray(value as ArrayValue);
     case "object":
-      return getTypeDefinitonForObject(value as ObjectValue);
+      return getTypeDefinitonForObject(value as ObjectValue, scopeName);
     default:
       throw new Error(`unhandled case "${valueType}"`);
   }
@@ -117,6 +135,6 @@ export const getTypeDefinitionForArray = (
   return {
     type: "array",
     name: getName(),
-    elements: (arrayValue as []).map(getTypeDefinition),
+    elements: (arrayValue as []).map((x) => getTypeDefinition(x)),
   };
 };
