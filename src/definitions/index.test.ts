@@ -10,6 +10,7 @@ import {
   getTypeDefinition,
 } from ".";
 import namesFixture from "../../fixtures/names.json";
+import arrayItemsFixture from "../../fixtures/array-items.json";
 
 beforeEach(() => {
   reset();
@@ -131,7 +132,7 @@ describe("getTypeDefinitonForObject", () => {
             },
             c: {
               type: "array",
-              name: "T2",
+              name: "C2",
               elements: [
                 {
                   type: "number",
@@ -219,10 +220,20 @@ describe("type names", () => {
   });
 
   describe("members", () => {
-    it("should attempt to match the name of the filed", () => {
+    it("should attempt to match the name of the field", () => {
       const result = getTypeDefinition(namesFixture) as ObjectTypeDefinition;
       const personMember = result.members.person as ObjectTypeDefinition;
       expect(personMember.name).toBe("Person1");
+    });
+  });
+
+  describe("arrays", () => {
+    it("should match the array label", () => {
+      const result = getTypeDefinition(
+        arrayItemsFixture
+      ) as ObjectTypeDefinition;
+      const peopleMember = result.members.people as ObjectTypeDefinition;
+      expect(peopleMember.name).toBe("People1");
     });
   });
 });
