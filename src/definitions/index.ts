@@ -121,7 +121,7 @@ export const getTypeDefinition: GetTypeDefinition = (value, scopeName) => {
     case "plain":
       return getTypeDefintionForValue(value as Value);
     case "array":
-      return getTypeDefinitionForArray(value as ArrayValue);
+      return getTypeDefinitionForArray(value as ArrayValue, scopeName);
     case "object":
       return getTypeDefinitonForObject(value as ObjectValue, scopeName);
     default:
@@ -129,12 +129,17 @@ export const getTypeDefinition: GetTypeDefinition = (value, scopeName) => {
   }
 };
 
-export const getTypeDefinitionForArray = (
-  arrayValue: ArrayValue
-): ArrayTypeDefinition => {
+type GetTypeDefinitionForArray = (
+  arrayValue: ArrayValue,
+  scopeName?: string
+) => ArrayTypeDefinition;
+export const getTypeDefinitionForArray: GetTypeDefinitionForArray = (
+  arrayValue,
+  scopeName
+) => {
   return {
     type: "array",
-    name: getName(),
+    name: getName(scopeName),
     elements: (arrayValue as []).map((x) => getTypeDefinition(x)),
   };
 };
