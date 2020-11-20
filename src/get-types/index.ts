@@ -28,10 +28,16 @@ const treeNodeToListItem = (
   definition: ArrayTypeDefinition | ObjectTypeDefinition
 ): SimpleDefinition => {
   if ("elements" in definition) {
+    // Array
     return {
       type: definition.name,
       elements: definition.elements.map((x) => {
         if (x.type === "object") {
+          return {
+            type: x.name,
+          };
+        }
+        if ("name" in x) {
           return {
             type: x.name,
           };
@@ -87,7 +93,8 @@ const treeToList = (definition: Definition): SimpleDefinition[] => {
   const listItems: SimpleDefinition[] = [];
   const visit = (node: Definition) => {
     if (node.type === "object" || node.type === "array") {
-      listItems.push(treeNodeToListItem(node));
+      const x = treeNodeToListItem(node);
+      listItems.push(x);
     }
   };
   dfs(definition, visit);
@@ -108,21 +115,24 @@ const toStringObject = (simpleObject: SimpleObject): string => {
 
 const getUnionString = (elements: string[]): string => {
   if (elements.length) {
-    const unique = elements.filter((x, i, all) => all.indexOf(x) === i)
-    return `(${unique.join(" | ")})`
+    const unique = elements.filter((x, i, all) => all.indexOf(x) === i);
+    return `(${unique.join(" | ")})`;
   }
-  return ''
-}
+  return "";
+};
 
-const toStringArray = (simpleArray: SimpleArray, parentTypeName: string): string => {
+const toStringArray = (
+  simpleArray: SimpleArray,
+  parentTypeName: string
+): string => {
   const typeName = simpleArray.type;
   const elements = simpleArray.elements.map((element) => {
-    if (element.type === 'array') {
-      return parentTypeName
+    if (element.type === "array") {
+      return parentTypeName;
     }
     return element.type;
   });
-  const unionString = getUnionString(elements)
+  const unionString = getUnionString(elements);
   const elementsString = `${unionString}[];`;
   const template = `type ${typeName} = ${elementsString}`;
   return template;
@@ -134,7 +144,10 @@ const toString = (simpleDefinition: SimpleDefinition): string => {
   if (isObject) {
     defString = toStringObject(simpleDefinition as SimpleObject);
   } else {
-    defString = toStringArray(simpleDefinition as SimpleArray, simpleDefinition.type);
+    defString = toStringArray(
+      simpleDefinition as SimpleArray,
+      simpleDefinition.type
+    );
   }
   return defString;
 };
@@ -142,6 +155,6 @@ const toString = (simpleDefinition: SimpleDefinition): string => {
 export const getTypesFromDefinition = (definition: Definition): string => {
   const list = treeToList(definition);
   const definitions = list.map(toString);
-  const prefix = 'export '
+  const prefix = "export ";
   return `${prefix}${definitions.join("\n\n")}\n`;
 };

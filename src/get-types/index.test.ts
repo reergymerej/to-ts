@@ -3,7 +3,7 @@ import { Definition, getTypeDefinition } from "../definitions";
 
 const definition: Definition = {
   type: "object",
-  name: "T0",
+  name: "Root",
   members: {
     foo: { type: "string" },
     baz: {
@@ -33,7 +33,7 @@ const definition: Definition = {
   },
 };
 
-const typesString = `export type T0 = {
+const typesString = `export type Root = {
   foo: string;
   baz: T1;
 };
@@ -61,102 +61,98 @@ describe("getTypesFromDefinition", () => {
   });
 });
 
-describe('arrays', () => {
-  describe('arrays instead of tuples', () => {
-    it('should return an untyped array for empties', () => {
+describe("arrays", () => {
+  describe("arrays instead of tuples", () => {
+    it("should return an untyped array for empties", () => {
       const definition: Definition = {
-        type: 'array',
-        name: 'T0',
+        type: "array",
+        name: "Root",
         elements: [],
-      }
-      const expected = `export type T0 = [];\n`
-      const actual = getTypesFromDefinition(definition)
-      expect(actual).toEqual(expected)
-    })
+      };
+      const expected = `export type Root = [];\n`;
+      const actual = getTypesFromDefinition(definition);
+      expect(actual).toEqual(expected);
+    });
 
-    it('should work for simple arrays', () => {
+    it("should work for simple arrays", () => {
       const definition: Definition = {
-        type: 'array',
-        name: 'T0',
+        type: "array",
+        name: "Root",
+        elements: [{ type: "number" }],
+      };
+      const expected = `export type Root = (number)[];\n`;
+      const actual = getTypesFromDefinition(definition);
+      expect(actual).toEqual(expected);
+    });
+
+    it("should work de-dupe entries in the union", () => {
+      const definition: Definition = {
+        type: "array",
+        name: "Root",
         elements: [
-          { type: 'number' },
+          { type: "number" },
+          { type: "number" },
+          { type: "number" },
+          { type: "number" },
         ],
-      }
-      const expected = `export type T0 = (number)[];\n`
-      const actual = getTypesFromDefinition(definition)
-      expect(actual).toEqual(expected)
-    })
+      };
+      const expected = `export type Root = (number)[];\n`;
+      const actual = getTypesFromDefinition(definition);
+      expect(actual).toEqual(expected);
+    });
 
-    it('should work de-dupe entries in the union', () => {
+    it("should work for arrays with types", () => {
       const definition: Definition = {
-        type: 'array',
-        name: 'T0',
+        type: "array",
+        name: "Root",
         elements: [
-          { type: 'number' },
-          { type: 'number' },
-          { type: 'number' },
-          { type: 'number' },
-        ],
-      }
-      const expected = `export type T0 = (number)[];\n`
-      const actual = getTypesFromDefinition(definition)
-      expect(actual).toEqual(expected)
-    })
-
-    it('should work for arrays with types', () => {
-      const definition: Definition = {
-        type: 'array',
-        name: 'T0',
-        elements: [
-          { type: 'number' },
+          { type: "number" },
           {
-            type: 'object',
-            name: 'T1',
+            type: "object",
+            name: "T1",
             members: {
-              fish: { type: 'boolean' },
+              fish: { type: "boolean" },
             },
           },
         ],
-      }
-      const expected = `export type T0 = (number | T1)[];
+      };
+      const expected = `export type Root = (number | T1)[];
 
 type T1 = {
   fish: boolean;
-};\n`
+};\n`;
 
-      const actual = getTypesFromDefinition(definition)
-      expect(actual).toEqual(expected)
-    })
-  })
-})
-
-fdescribe('tuples', () => {
-  it('should come out with the correct types', () => {
-      const definition: Definition = getTypeDefinition({
-        tuple: [
-          1,
-          [
-            true,
-            false,
-          ],
-          {
-            color: 'green',
-          },
-        ],
-      })
       const actual = getTypesFromDefinition(definition);
-      const expected = `export type T0 = {
-  tuple: T1;
+      expect(actual).toEqual(expected);
+    });
+  });
+});
+
+describe("tuples", () => {
+  it("should come out with the correct types", () => {
+    const definition: Definition = getTypeDefinition({
+      tuple: [
+        1,
+        [true, false],
+        {
+          color: "green",
+        },
+      ],
+    });
+
+    const actual = getTypesFromDefinition(definition);
+    const expected = `export type Root = {
+  tuple: Tuple;
 };
 
-type T1 = (number | T1 | T3)[];
+type Tuple = (number | T | T2)[];
 
-type T3 = {
+type T2 = {
   color: string;
 };
 
-type T2 = (boolean)[];
-`
-    expect(actual).toBe(expected)
-  })
-})
+type T = (boolean)[];
+`;
+    expect(actual).toBe(expected);
+  });
+});
