@@ -9,6 +9,8 @@ import {
   reset,
   getTypeDefinition,
 } from ".";
+import namesFixture from "../../fixtures/names.json";
+import arrayItemsFixture from "../../fixtures/array-items.json";
 
 beforeEach(() => {
   reset();
@@ -87,7 +89,7 @@ describe("getTypeDefinitonForObject", () => {
     const actual = getTypeDefinitonForObject(value);
     const expected: ObjectTypeDefinition = {
       type: "object",
-      name: "T0",
+      name: "Root",
       members: {
         a: {
           type: "string",
@@ -119,18 +121,18 @@ describe("getTypeDefinitonForObject", () => {
     const actual = getTypeDefinitonForObject(value);
     const expected: ObjectTypeDefinition = {
       type: "object",
-      name: "T0",
+      name: "Root",
       members: {
         a: {
           type: "object",
-          name: "T1",
+          name: "A",
           members: {
             b: {
               type: "string",
             },
             c: {
               type: "array",
-              name: "T2",
+              name: "C",
               elements: [
                 {
                   type: "number",
@@ -151,7 +153,7 @@ describe("getTypeDefinitionForArray", () => {
     const actual = getTypeDefinitionForArray(value);
     const expected: ArrayTypeDefinition = {
       type: "array",
-      name: "T0",
+      name: "Root",
       elements: [
         {
           type: "number",
@@ -169,7 +171,7 @@ describe("getTypeDefinitionForArray", () => {
     const actual = getTypeDefinitionForArray(value);
     const expected: ArrayTypeDefinition = {
       type: "array",
-      name: "T0",
+      name: "Root",
       elements: [],
     };
     expect(actual).toEqual(expected);
@@ -180,14 +182,14 @@ describe("getTypeDefinitionForArray", () => {
     const actual = getTypeDefinitionForArray(value);
     const expected: ArrayTypeDefinition = {
       type: "array",
-      name: "T0",
+      name: "Root",
       elements: [
         {
           type: "number",
         },
         {
           type: "array",
-          name: "T1",
+          name: "T",
           elements: [
             {
               type: "string",
@@ -196,7 +198,7 @@ describe("getTypeDefinitionForArray", () => {
         },
         {
           type: "object",
-          name: "T2",
+          name: "T2", // duplicate name
           members: {
             x: {
               type: "boolean",
@@ -209,39 +211,29 @@ describe("getTypeDefinitionForArray", () => {
   });
 });
 
-const x: TT0 = {
-  foo: "bar",
-  baz: [
-    1,
-    2,
-    3,
-    {
-      quux: null,
-      true: false,
-      1: {
-        false: [],
-      },
-    },
-  ],
-};
+describe("type names", () => {
+  describe("root type", () => {
+    it("should be Root", () => {
+      const result = getTypeDefinition(namesFixture) as ObjectTypeDefinition;
+      expect(result.name).toBe("Root");
+    });
+  });
 
-const types = getTypeDefinition(x);
+  describe("members", () => {
+    it("should attempt to match the name of the field", () => {
+      const result = getTypeDefinition(namesFixture) as ObjectTypeDefinition;
+      const personMember = result.members.person as ObjectTypeDefinition;
+      expect(personMember.name).toBe("Person");
+    });
+  });
 
-type TT0 = {
-  foo: string;
-  baz: TT1;
-};
-
-type TT1 = [number, number, number, TT2];
-
-type TT2 = {
-  1: TT3;
-  quux: null;
-  true: boolean;
-};
-
-type TT3 = {
-  false: TT4;
-};
-
-type TT4 = [];
+  describe("arrays", () => {
+    it("should match the array label", () => {
+      const result = getTypeDefinition(
+        arrayItemsFixture
+      ) as ObjectTypeDefinition;
+      const peopleMember = result.members.people as ObjectTypeDefinition;
+      expect(peopleMember.name).toBe("People");
+    });
+  });
+});
