@@ -9,6 +9,7 @@ import {
   reset,
   getTypeDefinition,
 } from ".";
+import namesFixture from "../../fixtures/names.json";
 
 beforeEach(() => {
   reset();
@@ -87,7 +88,7 @@ describe("getTypeDefinitonForObject", () => {
     const actual = getTypeDefinitonForObject(value);
     const expected: ObjectTypeDefinition = {
       type: "object",
-      name: "T0",
+      name: "Root",
       members: {
         a: {
           type: "string",
@@ -119,11 +120,11 @@ describe("getTypeDefinitonForObject", () => {
     const actual = getTypeDefinitonForObject(value);
     const expected: ObjectTypeDefinition = {
       type: "object",
-      name: "T0",
+      name: "Root",
       members: {
         a: {
           type: "object",
-          name: "T1",
+          name: "A1",
           members: {
             b: {
               type: "string",
@@ -151,7 +152,7 @@ describe("getTypeDefinitionForArray", () => {
     const actual = getTypeDefinitionForArray(value);
     const expected: ArrayTypeDefinition = {
       type: "array",
-      name: "T0",
+      name: "Root",
       elements: [
         {
           type: "number",
@@ -169,7 +170,7 @@ describe("getTypeDefinitionForArray", () => {
     const actual = getTypeDefinitionForArray(value);
     const expected: ArrayTypeDefinition = {
       type: "array",
-      name: "T0",
+      name: "Root",
       elements: [],
     };
     expect(actual).toEqual(expected);
@@ -180,7 +181,7 @@ describe("getTypeDefinitionForArray", () => {
     const actual = getTypeDefinitionForArray(value);
     const expected: ArrayTypeDefinition = {
       type: "array",
-      name: "T0",
+      name: "Root",
       elements: [
         {
           type: "number",
@@ -209,39 +210,19 @@ describe("getTypeDefinitionForArray", () => {
   });
 });
 
-const x: TT0 = {
-  foo: "bar",
-  baz: [
-    1,
-    2,
-    3,
-    {
-      quux: null,
-      true: false,
-      1: {
-        false: [],
-      },
-    },
-  ],
-};
+describe("type names", () => {
+  describe("root type", () => {
+    it("should be Root", () => {
+      const result = getTypeDefinition(namesFixture) as ObjectTypeDefinition;
+      expect(result.name).toBe("Root");
+    });
+  });
 
-const types = getTypeDefinition(x);
-
-type TT0 = {
-  foo: string;
-  baz: TT1;
-};
-
-type TT1 = [number, number, number, TT2];
-
-type TT2 = {
-  1: TT3;
-  quux: null;
-  true: boolean;
-};
-
-type TT3 = {
-  false: TT4;
-};
-
-type TT4 = [];
+  describe("members", () => {
+    it("should attempt to match the name of the filed", () => {
+      const result = getTypeDefinition(namesFixture) as ObjectTypeDefinition;
+      const personMember = result.members.person as ObjectTypeDefinition;
+      expect(personMember.name).toBe("Person1");
+    });
+  });
+});
