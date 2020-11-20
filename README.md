@@ -4,30 +4,34 @@ This converts simple JS to TS.
 
 ## Usage
 
-Run from CLI with
+Given fixtures/names.json
 
-    cat data.json | xargs -0 ./bin/main
-
+```json
+{
+  "favoriteNumber": 666,
+  "person": {
+    "name": "Santa",
+    "weight": 175
+  }
+}
 ```
-type T0 = {
-  foo: string;
-  baz: T1;
+
+run
+
+```sh
+$ cat fixtures/names.json | xargs -0 ./bin/main
+
+type Root = {
+  favoriteNumber: number;
+  person: Person;
 };
 
-type T1 = [number, number, number, T2];
-
-type T2 = {
-  1: T3;
-  quux: null;
-  true: boolean;
+type Person = {
+  name: string;
+  weight: number;
 };
-
-type T3 = {
-  false: T4;
-};
-
-type T4 = [];
 ```
+
 
 ## Scripts
 
