@@ -22,6 +22,7 @@ const getUnion = <T>(setA: Set<T>, setB: Set<T>): Set<T> => {
 };
 
 type WithKeys = { [key: string]: any };
+
 export const objectsHaveSameFieldLabels = (
   a: WithKeys,
   b: WithKeys
