@@ -12,17 +12,17 @@ type Atom = {
   type: string;
 };
 
-type SimpleArray = {
+export type SimpleArray = {
   type: string;
   elements: Atom[];
 };
 
-type SimpleObject = {
+export type SimpleObject = {
   type: string;
   members: Members;
 };
 
-type SimpleDefinition = SimpleArray | SimpleObject;
+export type SimpleDefinition = SimpleArray | SimpleObject;
 
 const treeNodeToListItem = (
   definition: ArrayTypeDefinition | ObjectTypeDefinition
@@ -87,7 +87,7 @@ const search = (nextNode: any) => (root: any, visit: (arg0: any) => void) => {
 
 const dfs = search((list: []) => list.pop());
 
-const treeToList = (definition: Definition): SimpleDefinition[] => {
+export const treeToList = (definition: Definition): SimpleDefinition[] => {
   // For each type: object|array, convert and add to list
   // dfs
   const listItems: SimpleDefinition[] = [];
