@@ -8,232 +8,232 @@ import {
   ArrayTypeDefinition,
   reset,
   getTypeDefinition,
-} from ".";
-import namesFixture from "../../fixtures/names.json";
-import arrayItemsFixture from "../../fixtures/array-items.json";
+} from '.'
+import namesFixture from '../../fixtures/names.json'
+import arrayItemsFixture from '../../fixtures/array-items.json'
 
 beforeEach(() => {
-  reset();
-});
+  reset()
+})
 
-describe("getTypeDefintionForValue", () => {
-  it("should return the type for `string`", () => {
-    const value = "Prodigy";
-    const actual = getTypeDefintionForValue(value);
+describe('getTypeDefintionForValue', () => {
+  it('should return the type for `string`', () => {
+    const value = 'Prodigy'
+    const actual = getTypeDefintionForValue(value)
     const expected: TypeDefintion = {
-      type: "string",
-    };
-    expect(actual).toEqual(expected);
-  });
+      type: 'string',
+    }
+    expect(actual).toEqual(expected)
+  })
 
-  it("should return the type for `number`", () => {
-    const value = 666;
-    const actual = getTypeDefintionForValue(value);
+  it('should return the type for `number`', () => {
+    const value = 666
+    const actual = getTypeDefintionForValue(value)
     const expected: TypeDefintion = {
-      type: "number",
-    };
-    expect(actual).toEqual(expected);
-  });
+      type: 'number',
+    }
+    expect(actual).toEqual(expected)
+  })
 
-  it("should return the type for `true`", () => {
-    const value = true;
-    const actual = getTypeDefintionForValue(value);
+  it('should return the type for `true`', () => {
+    const value = true
+    const actual = getTypeDefintionForValue(value)
     const expected: TypeDefintion = {
-      type: "boolean",
-    };
-    expect(actual).toEqual(expected);
-  });
+      type: 'boolean',
+    }
+    expect(actual).toEqual(expected)
+  })
 
-  it("should return the type for `false`", () => {
-    const value = false;
-    const actual = getTypeDefintionForValue(value);
+  it('should return the type for `false`', () => {
+    const value = false
+    const actual = getTypeDefintionForValue(value)
     const expected: TypeDefintion = {
-      type: "boolean",
-    };
-    expect(actual).toEqual(expected);
-  });
+      type: 'boolean',
+    }
+    expect(actual).toEqual(expected)
+  })
 
-  it("should return the type for `null`", () => {
-    const value = null;
-    const actual = getTypeDefintionForValue(value);
+  it('should return the type for `null`', () => {
+    const value = null
+    const actual = getTypeDefintionForValue(value)
     const expected: TypeDefintion = {
-      type: "null",
-    };
-    expect(actual).toEqual(expected);
-  });
+      type: 'null',
+    }
+    expect(actual).toEqual(expected)
+  })
 
-  describe("complex types", () => {
-    it("should throw for arrays", () => {
+  describe('complex types', () => {
+    it('should throw for arrays', () => {
       expect(() => {
-        getTypeDefintionForValue([] as any);
-      }).toThrow(/not a simple object/);
-    });
+        getTypeDefintionForValue([] as any)
+      }).toThrow(/not a simple object/)
+    })
 
-    it("should throw for {}", () => {
+    it('should throw for {}', () => {
       expect(() => {
-        getTypeDefintionForValue({} as any);
-      }).toThrow(/not a simple object/);
-    });
-  });
-});
+        getTypeDefintionForValue({} as any)
+      }).toThrow(/not a simple object/)
+    })
+  })
+})
 
-describe("getTypeDefinitonForObject", () => {
-  it("should handle flat objects", () => {
+describe('getTypeDefinitonForObject', () => {
+  it('should handle flat objects', () => {
     const value = {
-      a: "apple",
+      a: 'apple',
       b: false,
       c: true,
       d: 999,
       e: null,
-    };
-    const actual = getTypeDefinitonForObject(value);
+    }
+    const actual = getTypeDefinitonForObject(value)
     const expected: ObjectTypeDefinition = {
-      type: "object",
-      name: "Root",
+      type: 'object',
+      name: 'Root',
       members: {
         a: {
-          type: "string",
+          type: 'string',
         },
         b: {
-          type: "boolean",
+          type: 'boolean',
         },
         c: {
-          type: "boolean",
+          type: 'boolean',
         },
         d: {
-          type: "number",
+          type: 'number',
         },
         e: {
-          type: "null",
+          type: 'null',
         },
       },
-    };
-    expect(actual).toEqual(expected);
-  });
+    }
+    expect(actual).toEqual(expected)
+  })
 
-  it("should handle deep objects", () => {
+  it('should handle deep objects', () => {
     const value = {
       a: {
-        b: "castle",
+        b: 'castle',
         c: [1],
       },
-    };
-    const actual = getTypeDefinitonForObject(value);
+    }
+    const actual = getTypeDefinitonForObject(value)
     const expected: ObjectTypeDefinition = {
-      type: "object",
-      name: "Root",
+      type: 'object',
+      name: 'Root',
       members: {
         a: {
-          type: "object",
-          name: "A",
+          type: 'object',
+          name: 'A',
           members: {
             b: {
-              type: "string",
+              type: 'string',
             },
             c: {
-              type: "array",
-              name: "C",
+              type: 'array',
+              name: 'C',
               elements: [
                 {
-                  type: "number",
+                  type: 'number',
                 },
               ],
             },
           },
         },
       },
-    };
-    expect(actual).toEqual(expected);
-  });
-});
+    }
+    expect(actual).toEqual(expected)
+  })
+})
 
-describe("getTypeDefinitionForArray", () => {
-  it("should handle simple values", () => {
-    const value = [1, "two"];
-    const actual = getTypeDefinitionForArray(value);
+describe('getTypeDefinitionForArray', () => {
+  it('should handle simple values', () => {
+    const value = [1, 'two']
+    const actual = getTypeDefinitionForArray(value)
     const expected: ArrayTypeDefinition = {
-      type: "array",
-      name: "Root",
+      type: 'array',
+      name: 'Root',
       elements: [
         {
-          type: "number",
+          type: 'number',
         },
         {
-          type: "string",
+          type: 'string',
         },
       ],
-    };
-    expect(actual).toEqual(expected);
-  });
+    }
+    expect(actual).toEqual(expected)
+  })
 
-  it("should handle empty lists", () => {
-    const value = [];
-    const actual = getTypeDefinitionForArray(value);
+  it('should handle empty lists', () => {
+    const value = []
+    const actual = getTypeDefinitionForArray(value)
     const expected: ArrayTypeDefinition = {
-      type: "array",
-      name: "Root",
+      type: 'array',
+      name: 'Root',
       elements: [],
-    };
-    expect(actual).toEqual(expected);
-  });
+    }
+    expect(actual).toEqual(expected)
+  })
 
-  it("should handle nested values", () => {
-    const value = [1, ["two"], { x: false }] as ArrayValue;
-    const actual = getTypeDefinitionForArray(value);
+  it('should handle nested values', () => {
+    const value = [1, ['two'], { x: false }] as ArrayValue
+    const actual = getTypeDefinitionForArray(value)
     const expected: ArrayTypeDefinition = {
-      type: "array",
-      name: "Root",
+      type: 'array',
+      name: 'Root',
       elements: [
         {
-          type: "number",
+          type: 'number',
         },
         {
-          type: "array",
-          name: "T",
+          type: 'array',
+          name: 'T',
           elements: [
             {
-              type: "string",
+              type: 'string',
             },
           ],
         },
         {
-          type: "object",
-          name: "T2", // duplicate name
+          type: 'object',
+          name: 'T2', // duplicate name
           members: {
             x: {
-              type: "boolean",
+              type: 'boolean',
             },
           },
         },
       ],
-    };
-    expect(actual).toEqual(expected);
-  });
-});
+    }
+    expect(actual).toEqual(expected)
+  })
+})
 
-describe("type names", () => {
-  describe("root type", () => {
-    it("should be Root", () => {
-      const result = getTypeDefinition(namesFixture) as ObjectTypeDefinition;
-      expect(result.name).toBe("Root");
-    });
-  });
+describe('type names', () => {
+  describe('root type', () => {
+    it('should be Root', () => {
+      const result = getTypeDefinition(namesFixture) as ObjectTypeDefinition
+      expect(result.name).toBe('Root')
+    })
+  })
 
-  describe("members", () => {
-    it("should attempt to match the name of the field", () => {
-      const result = getTypeDefinition(namesFixture) as ObjectTypeDefinition;
-      const personMember = result.members.person as ObjectTypeDefinition;
-      expect(personMember.name).toBe("Person");
-    });
-  });
+  describe('members', () => {
+    it('should attempt to match the name of the field', () => {
+      const result = getTypeDefinition(namesFixture) as ObjectTypeDefinition
+      const personMember = result.members.person as ObjectTypeDefinition
+      expect(personMember.name).toBe('Person')
+    })
+  })
 
-  describe("arrays", () => {
-    it("should match the array label", () => {
+  describe('arrays', () => {
+    it('should match the array label', () => {
       const result = getTypeDefinition(
         arrayItemsFixture
-      ) as ObjectTypeDefinition;
-      const peopleMember = result.members.people as ObjectTypeDefinition;
-      expect(peopleMember.name).toBe("People");
-    });
-  });
-});
+      ) as ObjectTypeDefinition
+      const peopleMember = result.members.people as ObjectTypeDefinition
+      expect(peopleMember.name).toBe('People')
+    })
+  })
+})
